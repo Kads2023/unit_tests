@@ -1,3 +1,13 @@
+# To write comprehensive tests for the `PreProcessingUtils` class using `pytest` and `monkeypatch`, we need to consider the various possible scenarios, including both successful and error cases. We'll test:
+
+# 1. **Valid and invalid input types** for the `get_file_data` method.
+# 2. **Success and failure scenarios** for the `_get_az_credential` method, such as when credentials are successfully obtained or an authentication error occurs.
+# 3. **Valid data retrieval from Azure DataLake**.
+
+# Below is the full set of possible test cases:
+
+### Test Implementation Using `pytest` and `monkeypatch`
+
 import pytest
 from unittest.mock import MagicMock
 from azure.core.exceptions import ClientAuthenticationError
@@ -151,31 +161,40 @@ def test_get_file_data_download_fail(monkeypatch):
 
     with pytest.raises(Exception, match="Download failed"):
         utils.get_file_data(passed_account_url, passed_container_name, passed_file_path)
-# Explanation of the Tests:
-# test_get_az_credential_success:
 
-# This test ensures that when the ManagedIdentityCredential is correctly set up, the get_token method is called with the correct parameters and returns the expected credential.
-# test_get_az_credential_auth_error:
+### Explanation of the Tests:
 
-# This test simulates a scenario where obtaining the token fails due to authentication issues. We expect a ClientAuthenticationError to be raised.
-# test_get_file_data_success:
+# 1. **`test_get_az_credential_success`:**
+#    - This test ensures that when the `ManagedIdentityCredential` is correctly set up, the `get_token` method is called with the correct parameters and returns the expected credential.
 
-# This test mocks both the credential and the DataLake client to simulate a successful file download from Azure. It verifies that the get_file_data method properly retrieves and decodes the file data.
-# test_get_file_data_invalid_input:
+# 2. **`test_get_az_credential_auth_error`:**
+#    - This test simulates a scenario where obtaining the token fails due to authentication issues. We expect a `ClientAuthenticationError` to be raised.
 
-# This test checks that the get_file_data method raises a TypeError when one or more of the input parameters are not of type str.
-# test_get_az_credential_general_error:
+# 3. **`test_get_file_data_success`:**
+#    - This test mocks both the credential and the DataLake client to simulate a successful file download from Azure. It verifies that the `get_file_data` method properly retrieves and decodes the file data.
 
-# This test simulates a general error (e.g., a problem with setting up the credential) and ensures that the method raises a generic exception when the credential setup fails.
-# test_get_az_credential_token_failure:
+# 4. **`test_get_file_data_invalid_input`:**
+#    - This test checks that the `get_file_data` method raises a `TypeError` when one or more of the input parameters are not of type `str`.
 
-# This test checks that if the get_token method fails (e.g., due to a network issue or misconfiguration), the method raises an exception.
-# test_get_file_data_download_fail:
+# 5. **`test_get_az_credential_general_error`:**
+#    - This test simulates a general error (e.g., a problem with setting up the credential) and ensures that the method raises a generic exception when the credential setup fails.
 
-# This test ensures that if the file download fails (e.g., network issues, missing file), an exception is raised.
-# Running the Tests:
-# To run these tests using pytest, execute the following command in your terminal:
+# 6. **`test_get_az_credential_token_failure`:**
+#    - This test checks that if the `get_token` method fails (e.g., due to a network issue or misconfiguration), the method raises an exception.
 
-# bash
-# Copy
+# 7. **`test_get_file_data_download_fail`:**
+#    - This test ensures that if the file download fails (e.g., network issues, missing file), an exception is raised.
+
+# ### Running the Tests:
+# To run these tests using `pytest`, execute the following command in your terminal:
+
+# ```bash
 # pytest test_your_module.py
+# ```
+
+# Where `test_your_module.py` is the filename containing your test code.
+
+# ### Benefits of This Approach:
+# - **Isolation:** The tests are isolated from Azure services, so you won't need to actually make network calls.
+# - **Complete Coverage:** By testing for both success and failure cases (such as errors and invalid inputs), we ensure that all important scenarios are covered.
+# - **Error Handling:** Tests for exceptions ensure that the code handles edge cases and failures appropriately.
