@@ -1,0 +1,2 @@
+class MockClientAuthenticationError(Exception):
+    pass
