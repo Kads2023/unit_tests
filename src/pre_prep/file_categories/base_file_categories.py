@@ -2,9 +2,7 @@ from abc import abstractmethod
 
 
 class BaseFileCategories:
-  dict_of_file_type_wise_list_of_files_to_process = []
-  dict_of_file_type_wise_file_columns_and_screen = {}
-
+  
   @abstractmethod
   def __init__(self, lc):
     pass
