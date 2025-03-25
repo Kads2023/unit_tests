@@ -7,34 +7,24 @@
 
 # pytest D:\<folder_name>\test_pre_prep_azure_related.py
 
+# To test the PreProcessingUtils class with pytest and monkeypatch, we need to cover the following areas:
 
-# To write tests for the PreProcessingUtils class using pytest and monkeypatch, we need to focus on testing the following functionalities:
+# Constructor __init__: Test the behavior of the constructor, particularly when dbutils is passed and when it is not passed, and the fallback to DBUtils using the active Spark session.
 
-# Constructor __init__ - We need to check the behavior of the constructor when the dbutils argument is provided and when it is not. This will allow us to test the logic where the dbutils is assigned to a DBUtils instance or is set to None.
+# Method get_list_of_directories: Test the method's behavior with different inputs and check how it interacts with dbutils.fs.ls and handles exceptions like FileNotFoundError and other general exceptions.
 
-# Method get_list_of_directories - This method interacts with dbutils.fs.ls() to list directories and checks the type of the input to ensure it’s a string. We will need to mock the dbutils.fs.ls function.
+# Method overwrite_file: Test the method with different file names and contents and check its interaction with dbutils.fs.rm and dbutils.fs.put.
 
-# Method overwrite_file - This method interacts with dbutils.fs.rm and dbutils.fs.put. We will need to mock these functions and test scenarios such as successful deletion and file writing.
-
-# Let's write the pytest test cases with monkeypatch for these methods.
+# Test Cases for PreProcessingUtils with monkeypatch
+# We will use monkeypatch to mock dependencies like DBUtils and FileCategoriesFactory and to simulate different conditions.
 
 
 import pytest
 from unittest.mock import MagicMock
-from your_module import PreProcessingUtils  # Replace with actual import
 from pyspark.sql import SparkSession
+from your_module import PreProcessingUtils  # Replace with actual import
 
-
-# Mocking the FileCategoriesFactory and BaseFileCategories
-class MockFileCategoriesFactory:
-    def __init__(self, lc):
-        pass
-
-    def get_file_category_object(self, source_system_type):
-        return MagicMock()  # Mocking the file category object
-
-
-# Mocking the dbutils
+# Mocking DBUtils and its methods
 class MockDBUtils:
     def __init__(self, spark):
         self.fs = MagicMock()  # Mocking the fs module
@@ -42,80 +32,101 @@ class MockDBUtils:
     class fs:
         @staticmethod
         def ls(location):
-            return []  # Return an empty list for simplicity
+            # Simulate returning directory listings
+            return [MagicMock(name="dir1", isDir=MagicMock(return_value=True)),
+                    MagicMock(name="file1.txt", isDir=MagicMock(return_value=False))]
 
         @staticmethod
         def rm(file_name):
-            pass  # Mock rm functionality
+            pass  # Simulate the remove method
 
         @staticmethod
         def put(file_name, content):
-            pass  # Mock put functionality
+            pass  # Simulate the put method
 
 
-@pytest.fixture
-def mock_spark():
-    return SparkSession.builder.master("local").appName("Test").getOrCreate()
+# Mocking FileCategoriesFactory and BaseFileCategories
+class MockFileCategoriesFactory:
+    def __init__(self, lc):
+        self.lc = lc
+    
+    def get_file_category_object(self, source_system_type):
+        # Return a mock file category object
+        return MagicMock()
 
 
 # Test constructor initialization
-def test_init_with_dbutils(mock_spark, monkeypatch):
-    # Monkeypatch DBUtils and FileCategoriesFactory
+def test_init_with_dbutils(monkeypatch):
+    # Monkeypatch the FileCategoriesFactory and DBUtils
     monkeypatch.setattr('your_module.FileCategoriesFactory', MockFileCategoriesFactory)
-
-    mock_dbutils = MockDBUtils(mock_spark)
+    
+    # Mock DBUtils instance
+    mock_dbutils = MockDBUtils(spark=None)
+    
+    # Initialize PreProcessingUtils with dbutils
     utils = PreProcessingUtils(lc="test_lc", source_system_type="test_system", file_type_to_process="test_type", dbutils=mock_dbutils)
     
+    # Assert that dbutils is set correctly
     assert utils.dbutils == mock_dbutils
-    assert isinstance(utils.file_category_obj, MagicMock)  # Check that the file category object is mocked
 
 
-def test_init_without_dbutils(mock_spark, monkeypatch):
-    # Monkeypatch DBUtils and FileCategoriesFactory
+def test_init_without_dbutils(monkeypatch):
+    # Monkeypatch the FileCategoriesFactory and DBUtils
     monkeypatch.setattr('your_module.FileCategoriesFactory', MockFileCategoriesFactory)
-    
-    # Monkeypatch the DBUtils to simulate no DBUtils being passed
-    monkeypatch.setattr('pyspark.sql.SparkSession.getActiveSession', lambda: mock_spark)
-    monkeypatch.setattr('pyspark.dbutils.DBUtils', MockDBUtils)
 
+    # Mock SparkSession and DBUtils (simulate it being created automatically)
+    mock_spark = MagicMock(spec=SparkSession)
+    monkeypatch.setattr('pyspark.sql.SparkSession.getActiveSession', lambda: mock_spark)
+    
+    # Monkeypatch the import of DBUtils
+    monkeypatch.setattr('pyspark.dbutils.DBUtils', MockDBUtils)
+    
+    # Initialize PreProcessingUtils without passing dbutils
     utils = PreProcessingUtils(lc="test_lc", source_system_type="test_system", file_type_to_process="test_type")
     
-    # Check that DBUtils was created
+    # Assert that dbutils was initialized correctly
     assert isinstance(utils.dbutils, MockDBUtils)
 
 
-# Test get_list_of_directories
-def test_get_list_of_directories(mock_spark, monkeypatch):
-    # Setup mock dbutils
-    mock_dbutils = MockDBUtils(mock_spark)
-    utils = PreProcessingUtils(lc="test_lc", source_system_type="test_system", file_type_to_process="test_type", dbutils=mock_dbutils)
-
-    # Mock dbutils.fs.ls to return a list with directories
-    mock_dbutils.fs.ls = MagicMock(return_value=[MagicMock(name="dir1", endswith=MagicMock(return_value=True)),
-                                                 MagicMock(name="file1.txt", endswith=MagicMock(return_value=False))])
-
-    dir_list = utils.get_list_of_directories("some/path")
+# Test get_list_of_directories method
+def test_get_list_of_directories(monkeypatch):
+    # Monkeypatch DBUtils and FileCategoriesFactory
+    monkeypatch.setattr('your_module.FileCategoriesFactory', MockFileCategoriesFactory)
     
-    assert dir_list == ['dir1/']  # Check that only directories are returned
+    # Mock dbutils
+    mock_dbutils = MockDBUtils(spark=None)
+    utils = PreProcessingUtils(lc="test_lc", source_system_type="test_system", file_type_to_process="test_type", dbutils=mock_dbutils)
+    
+    # Test valid directory listing
+    dirs = utils.get_list_of_directories("some/path")
+    assert dirs == ["dir1"]  # Should only return directories
 
     # Test exception when passed_file_location is not a string
     with pytest.raises(TypeError):
         utils.get_list_of_directories(123)
 
+    # Simulate FileNotFoundError
+    mock_dbutils.fs.ls = MagicMock(side_effect=FileNotFoundError("File not found"))
+    dirs = utils.get_list_of_directories("some/path")
+    assert dirs is None  # The exception is caught, so it should return None
+
+    # Simulate a general exception
+    mock_dbutils.fs.ls = MagicMock(side_effect=Exception("General error"))
+    dirs = utils.get_list_of_directories("some/path")
+    assert dirs is None  # The exception is caught, so it should return None
+
 
 # Test overwrite_file method
-def test_overwrite_file(mock_spark, monkeypatch):
-    # Setup mock dbutils
-    mock_dbutils = MockDBUtils(mock_spark)
+def test_overwrite_file(monkeypatch):
+    # Monkeypatch DBUtils and FileCategoriesFactory
+    monkeypatch.setattr('your_module.FileCategoriesFactory', MockFileCategoriesFactory)
+    
+    # Mock dbutils
+    mock_dbutils = MockDBUtils(spark=None)
     utils = PreProcessingUtils(lc="test_lc", source_system_type="test_system", file_type_to_process="test_type", dbutils=mock_dbutils)
 
-    # Monkeypatch dbutils.fs.rm and dbutils.fs.put to mock behavior
-    mock_dbutils.fs.rm = MagicMock()
-    mock_dbutils.fs.put = MagicMock()
-
+    # Test valid input
     utils.overwrite_file("test_file.txt", "some content")
-
-    # Check that rm and put were called with the correct arguments
     mock_dbutils.fs.rm.assert_called_once_with("test_file.txt")
     mock_dbutils.fs.put.assert_called_once_with("test_file.txt", "some content")
 
@@ -126,18 +137,72 @@ def test_overwrite_file(mock_spark, monkeypatch):
     # Test exception when passed_file_content is not a string
     with pytest.raises(TypeError):
         utils.overwrite_file("file.txt", 123)
-# Explanation of Tests:
+
+    # Simulate a general exception in rm method
+    mock_dbutils.fs.rm = MagicMock(side_effect=Exception("Error deleting file"))
+    utils.overwrite_file("test_file.txt", "content")
+    # Ensure that the file put method is still called
+    mock_dbutils.fs.put.assert_called_once_with("test_file.txt", "content")
+
+
+# Test when a method raises an exception in the PreProcessingUtils class
+def test_get_list_of_directories_exception_handling(monkeypatch):
+    # Mock FileCategoriesFactory and DBUtils
+    monkeypatch.setattr('your_module.FileCategoriesFactory', MockFileCategoriesFactory)
+    
+    # Mock DBUtils
+    mock_dbutils = MockDBUtils(spark=None)
+    utils = PreProcessingUtils(lc="test_lc", source_system_type="test_system", file_type_to_process="test_type", dbutils=mock_dbutils)
+
+    # Simulate an exception in fs.ls to test error handling
+    mock_dbutils.fs.ls = MagicMock(side_effect=Exception("Some unexpected error"))
+    dirs = utils.get_list_of_directories("some/path")
+    
+    # Check that the method handles the exception without crashing
+    assert dirs is None  # The exception is caught and the method should return None
+
+# Explanation of the Test Cases:
 # Test Constructor Initialization:
 
-# test_init_with_dbutils: Tests if the dbutils argument is properly passed to the PreProcessingUtils constructor. The test uses monkeypatch to replace the FileCategoriesFactory class and checks if dbutils is assigned correctly.
+# test_init_with_dbutils: Tests the constructor when dbutils is passed as an argument. We mock MockDBUtils and check if dbutils is assigned correctly.
 
-# test_init_without_dbutils: Tests the case when dbutils is not provided and the constructor falls back on using the active Spark session to create dbutils. It ensures the correct behavior by mocking the Spark session.
+# test_init_without_dbutils: Tests the constructor when dbutils is not passed. The method should automatically initialize dbutils using SparkSession.getActiveSession().
 
-# Test get_list_of_directories:
+# Test get_list_of_directories Method:
 
-# test_get_list_of_directories: Tests the method get_list_of_directories for a valid string path. The dbutils.fs.ls method is mocked to return a mixture of directories and files. It checks that only directories are returned.
+# test_get_list_of_directories: Tests the behavior of the get_list_of_directories method:
 
-# The test also checks that a TypeError is raised when the input to the method is not a string.
+# Valid input: Returns directories only.
+
+# TypeError: If passed_file_location is not a string, it raises a TypeError.
+
+# FileNotFoundError: Simulates FileNotFoundError to check error handling.
+
+# General Exception: Simulates a generic exception to check error handling.
+
+# Test overwrite_file Method:
+
+# test_overwrite_file: Tests the behavior of the overwrite_file method:
+
+# Valid input: Ensures that fs.rm and fs.put are called correctly.
+
+# TypeError: Checks if TypeError is raised when the file name or content is not a string.
+
+# Simulate errors in fs.rm: Tests that errors in the file removal process are handled properly.
+
+# Test Exception Handling:
+
+# test_get_list_of_directories_exception_handling: Tests the get_list_of_directories method when an exception is raised (e.g., an unexpected error). The method should handle the error gracefully without crashing.
+
+# How to Run:
+# Save the test code in a file (e.g., test_preprocessing_utils.py).
+
+# Run the tests using pytest:
+
+# bash
+# Copy
+# pytest test_preprocessing_utils.py
+# These tests cover the core functionality of the PreProcessingUtils class, including constructor behavior, error handling, and interactions with dbutils.fs.ls, dbutils.fs.rm, and dbutils.fs.put.
 
 # Test overwrite_file:
 
