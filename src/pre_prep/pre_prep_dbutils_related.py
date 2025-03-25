@@ -28,14 +28,18 @@ class PreProcessingUtils:
     def get_list_of_directories(self, passed_file_location):
       if type(passed_file_location) is not str:
         raise TypeError("passed_file_location must be string")
-
-      dir_list = []
-      list_of_folders = self.dbutils.fs.ls(passed_file_location)
-      for each_listing in list_of_folders:
-        each_name = each_listing.name
-        if each_name.endswith("/"):
-          dir_list.append(each_name)
-      return dir_list
+      try:
+          dir_list = []
+          list_of_folders = self.dbutils.fs.ls(passed_file_location)
+          for each_listing in list_of_folders:
+            each_name = each_listing.name
+            if each_name.isDir():
+              dir_list.append(each_name)
+          return dir_list
+      except FileNotFoundError as e:
+          print(f"file not found, {e}")
+      except Exception as e:
+          print(f"exception --> {e}")
 
 
     def overwrite_file(self, passed_file_name, passed_file_content):
