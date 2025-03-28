@@ -6,7 +6,8 @@ from azure.storage.filedatalake import DataLakeFileClient
 from pyspark.sql import SparkSession
 
 from azure.core.exceptions import (
-    ClientAuthenticationError # if tenant_id, client_id or client_secret is incorrect
+    ClientAuthenticationError, # if tenant_id, client_id or client_secret is incorrect
+    ResourceNotFoundError, # cannot find the file on ADLS
 )
 
 
@@ -16,7 +17,7 @@ class PreProcessingUtils:
         self.file_type_to_process = file_type_to_process
     
     def _get_az_credential(self) -> ManagedIdentityCredential:
-        this_module = f"[{type("
+        this_module = f"[{type(self).__name__}._get_az_credential()] -"
         try:
             az_credential = ManagedIdentityCredential()
             az_credential.get_token(
@@ -24,29 +25,61 @@ class PreProcessingUtils:
             )
             return az_credential
         except ClientAuthenticationError as e:
-            print(f"[{this_module_name}.{type(self}.__name__}.{this_method_name}] - Cannot obtain the Azure access token to access ADLS ({e})")
+            print(f"{this_module} Cannot obtain the Azure access token to access ADLS ({e})")
             raise
         except Exception as e:
-            print(f"[{this_module_name}.{type(self}.__name__}.{this_method_name}] - Error setting up ManagedIdentityCredential ({e})")
+            print(f"{this_module} Error setting up ManagedIdentityCredential ({e})")
             raise
     
     def get_file_data(self, passed_account_url, passed_container_name, passed_file_path):
+        this_module = f"[{type(self).__name__}.get_file_data()] -"
         if type(passed_account_url) is not str:
-            raise TypeError("passed_account_url must be string")
+            error_msg = f"{this_module} TypeError : "
+                        f"passed_account_url -- {passed_account_url} must be a string"
+            print(error_msg)
+            raise TypeError(error_msg)
+        if passed_account_url.strip() == "":
+            error_msg = f"{this_module} "
+                        f"passed_account_url -- {passed_account_url} must not be an empty string"
+            print(error_msg)
+            raise Exception(error_msg)
         
         if type(passed_container_name) is not str:
-            raise TypeError("passed_container_name must be string")
+            error_msg = f"{this_module} TypeError : "
+                        f"passed_container_name -- {passed_container_name} must be a string"
+            print(error_msg)
+            raise TypeError(error_msg)
+        if passed_container_name.strip() == "":
+            error_msg = f"{this_module} "
+                        f"passed_container_name -- {passed_container_name} must not be an empty string"
+            print(error_msg)
+            raise Exception(error_msg)
         
         if type(passed_file_path) is not str:
-            raise TypeError("passed_file_path must be string")
+            error_msg = f"{this_module} TypeError : "
+                        f"passed_file_path -- {passed_file_path} must be a string"
+            print(error_msg)
+            raise TypeError(error_msg)
+        if passed_file_path.strip() == "":
+            error_msg = f"{this_module} "
+                        f"passed_file_path -- {passed_file_path} must not be an empty string"
+            print(error_msg)
+            raise Exception(error_msg)
         
         az_credential = self._get_az_credential()
-        az_client = DataLakeFileClient(
-            account_url=passed_account_url,
-            credential=az_credential,
-            file_system_name=passed_container_name,
-            file_path=passed_file_path,
-        )
-        data = az_client.download_file().readall()
-        decoded_data = data.decode("utf-8")
-        return decoded_data
+        try:
+            az_client = DataLakeFileClient(
+                account_url=passed_account_url,
+                credential=az_credential,
+                file_system_name=passed_container_name,
+                file_path=passed_file_path,
+            )
+            data = az_client.download_file().readall()
+            decoded_data = data.decode("utf-8")
+            return decoded_data
+        except ResourceNotFoundError as e:
+            print(f"{this_module} ({e})")
+            raise
+        except Exception as e:
+            print(f"{this_module} ({e})")
+            raise
