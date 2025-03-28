@@ -9,7 +9,7 @@ mock_mi_credential_instance.get_token.return_value = mock_az_token
 
 # mock fail
 class MockManagedIdentityCredentialFailCAE:
-    def __iniot__(self):
+    def __init__(self):
         pass
 
     def get_token(self, url):
@@ -25,3 +25,4 @@ class MockManagedIdentityCredentialFailE:
         raise Exception(
           "simulated error MockManagedIdentityCredentialFailE"
         )
+
