@@ -2,7 +2,6 @@ from .base_file_categories import BaseFileCategories
 
 
 class TrialFileCategories(BaseFileCategories):
-    this_class_name = f"{type(self).__name__}"
     dict_of_file_type_wise_list_of_files_to_process = {'trial_1': ['trial.csv']}
     dict_of_file_type_wise_file_columns_and_schema = {
       'trial_1': {
@@ -24,8 +23,8 @@ class TrialFileCategories(BaseFileCategories):
     )
   
     def __init__(self, lc):
-        self.this_class_name = f"{type(self).__name__}"
         self.lc = lc
+        self.this_class_name = f"{type(self).__name__}"
         if self.list_of_files_keys != self.file_columns_and_schema_keys:
             self.file_types = []
             error_msg = (f"[{self.this_class_name}.__init__()] - "
