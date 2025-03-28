@@ -52,3 +52,35 @@ class MockBaseFileCategoriesE(BaseFileCategories):
         f"{passed_file_type_to_process} "
         f"not available as key in file_columns_and_schema dictionary"
       )
+
+class MockBaseFileCategoriesKeyE(BaseFileCategories):
+    dict_of_file_type_wise_list_of_files_to_process = {
+      'trial_1': ['trial.csv']
+    }
+    dict_of_file_type_wise_file_columns_and_schema = {
+      'trial_1': {},
+      'trial': {}
+    }
+    list_of_files_keys = set(
+        dict_of_file_type_wise_list_of_files_to_process.keys()
+    )
+    file_columns_and_schema_keys = set(
+        dict_of_file_type_wise_file_columns_and_schema.keys()
+    )
+  
+    def __init__(self, lc):
+        self.lc = lc
+        self.this_class_name = f"{type(self).__name__}"
+        if self.list_of_files_keys != self.file_columns_and_schema_keys:
+            self.file_types = []
+            error_msg = (f"[{self.this_class_name}.__init__()] - "
+                         f"keys do not match, "
+                         f"check class implementation, "
+                         f"list_of_files_keys --> {self.list_of_files_keys}, "
+                         f"file_columns_and_schema_keys --> "
+                         f"{self.file_columns_and_schema_keys}"
+                        )
+            print(error_msg)
+            raise Exception(error_msg)
+        else:
+            self.file_types = list(self.list_of_files_keys)
