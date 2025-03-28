@@ -16,8 +16,7 @@ class PreProcessingUtils:
         self.file_type_to_process = file_type_to_process
     
     def _get_az_credential(self) -> ManagedIdentityCredential:
-        this_method_name = self._get_az_credential.__name__
-        this_module_name = self.__class__.__module__
+        this_module = f"[{type("
         try:
             az_credential = ManagedIdentityCredential()
             az_credential.get_token(
