@@ -1,4 +1,4 @@
-from pre_prep.file_categories.base_file_categories import BaseFileCategories
+from pre_processing.file_categories.base_file_categories import BaseFileCategories
 
 
 class MockFileCategoriesFactory:
@@ -6,7 +6,7 @@ class MockFileCategoriesFactory:
     self.lc = lc
     self.this_class_name = f"{type(self).__name__}"
 
-  de get_file_category_object(self, passed_source_system_type) -> BBaseFileCategories:
+  def get_file_category_object(self, passed_source_system_type) -> BaseFileCategories:
     raise Exception(
       f"[{self.this_class_name}.get_file_category_object()] - "
       f"Mock Exception"
@@ -18,7 +18,7 @@ class MockBaseFileCategories(BaseFileCategories):
         self.lc = lc
   
     def get_list_of_files_to_process(self, passed_file_type_to_process):
-        return ['mock_file.csv]
+        return ['mock_file.csv']
   
     def get_file_columns_and_schema_dict(self, passed_file_type_to_process):
         return {
@@ -84,3 +84,9 @@ class MockBaseFileCategoriesKeyE(BaseFileCategories):
             raise Exception(error_msg)
         else:
             self.file_types = list(self.list_of_files_keys)
+
+    def get_list_of_files_to_process(self, passed_file_type_to_process):
+        pass
+
+    def get_file_columns_and_schema_dict(self, passed_file_type_to_process):
+        pass

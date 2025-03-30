@@ -34,35 +34,35 @@ class PreProcessingUtils:
     def get_file_data(self, passed_account_url, passed_container_name, passed_file_path):
         this_module = f"[{type(self).__name__}.get_file_data()] -"
         if type(passed_account_url) is not str:
-            error_msg = f"{this_module} TypeError : "
-                        f"passed_account_url -- {passed_account_url} must be a string"
+            error_msg = (f"{this_module} TypeError : "
+                         f"passed_account_url -- {passed_account_url} must be a string")
             print(error_msg)
             raise TypeError(error_msg)
         if passed_account_url.strip() == "":
-            error_msg = f"{this_module} "
-                        f"passed_account_url -- {passed_account_url} must not be an empty string"
+            error_msg = (f"{this_module} "
+                         f"passed_account_url -- {passed_account_url} must not be an empty string")
             print(error_msg)
             raise Exception(error_msg)
         
         if type(passed_container_name) is not str:
-            error_msg = f"{this_module} TypeError : "
-                        f"passed_container_name -- {passed_container_name} must be a string"
+            error_msg = (f"{this_module} TypeError : "
+                         f"passed_container_name -- {passed_container_name} must be a string")
             print(error_msg)
             raise TypeError(error_msg)
         if passed_container_name.strip() == "":
-            error_msg = f"{this_module} "
-                        f"passed_container_name -- {passed_container_name} must not be an empty string"
+            error_msg = (f"{this_module} "
+                         f"passed_container_name -- {passed_container_name} must not be an empty string")
             print(error_msg)
             raise Exception(error_msg)
         
         if type(passed_file_path) is not str:
-            error_msg = f"{this_module} TypeError : "
-                        f"passed_file_path -- {passed_file_path} must be a string"
+            error_msg = (f"{this_module} TypeError : "
+                         f"passed_file_path -- {passed_file_path} must be a string")
             print(error_msg)
             raise TypeError(error_msg)
         if passed_file_path.strip() == "":
-            error_msg = f"{this_module} "
-                        f"passed_file_path -- {passed_file_path} must not be an empty string"
+            error_msg = (f"{this_module} "
+                         f"passed_file_path -- {passed_file_path} must not be an empty string")
             print(error_msg)
             raise Exception(error_msg)
         

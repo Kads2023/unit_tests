@@ -8,7 +8,7 @@ class TrialFileCategories(BaseFileCategories):
         "data": {
           "header": "Type,Term",
           "string_to_compare": '"Type","Term"'
-        }
+        },
         "data_currency_basis": {
           "header": "Basis_Type,Basis_Term,Basis_Offer",
           "string_to_compare": '"Type","Term","Basis Offer"'
@@ -43,7 +43,7 @@ class TrialFileCategories(BaseFileCategories):
         if passed_file_type_to_process in self.file_types:
             return self.dict_of_file_type_wise_list_of_files_to_process[passed_file_type_to_process]
         else:
-            raise Exception(f"[{this_class_name}.get_list_of_files_to_process()] - "
+            raise Exception(f"[{self.this_class_name}.get_list_of_files_to_process()] - "
                             f"{passed_file_type_to_process} not available in "
                             f"files_to_process dictionary, "
                             f"keys available --> {self.file_types}"
@@ -53,7 +53,7 @@ class TrialFileCategories(BaseFileCategories):
         if passed_file_type_to_process in self.file_types:
             return self.dict_of_file_type_wise_file_columns_and_schema[passed_file_type_to_process]
         else:
-            raise Exception(f"[{this_class_name}.get_list_of_files_to_process()] - "
+            raise Exception(f"[{self.this_class_name}.get_list_of_files_to_process()] - "
                             f"{passed_file_type_to_process} not available in "
                             f"file_columns_and_schema dictionary, "
                             f"keys available --> {self.file_types}"

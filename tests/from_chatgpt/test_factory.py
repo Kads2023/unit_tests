@@ -18,7 +18,11 @@
 import pytest
 from unittest.mock import MagicMock
 import importlib
-from your_module import FileCategoriesFactory, TrialFileCategories, BaseFileCategories  # Replace with actual imports
+
+from pre_processing.file_categories.file_category_factory import FileCategoriesFactory
+from pre_processing.file_categories.base_file_categories import BaseFileCategories
+
+from pre_processing.file_categories.trial_file_categories import TrialFileCategories
 
 # Mock the abstract class for testing
 class MockBaseFileCategories(BaseFileCategories):

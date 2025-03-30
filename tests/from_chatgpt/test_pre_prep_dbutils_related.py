@@ -3,7 +3,7 @@
 # conda create --prefix D:\<folder_name>\<env_name> python=3.11.0 --no-default-packages
 # conda install pyspark==3.5.4
 # conda install azure-identity==1.19.0
-# conda install axure-storage-file-datalate==12.17.0
+# conda install azure-storage-file-datalate==12.17.0
 
 # pytest D:\<folder_name>\test_pre_prep_azure_related.py
 
@@ -22,7 +22,7 @@
 import pytest
 from unittest.mock import MagicMock
 from pyspark.sql import SparkSession
-from your_module import PreProcessingUtils  # Replace with actual import
+from pre_processing.pre_prep_dbutils_related import PreProcessingUtils  # Replace with actual import
 
 # Mocking DBUtils and its methods
 class MockDBUtils:

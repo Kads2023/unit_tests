@@ -5,7 +5,7 @@ from .mock_file_info import FileInfoMock
 class DbutilsMock:
   fs = MagicMock()
 
-  def __init__(self, fs_ls_list: list = None)
+  def __init__(self, fs_ls_list: list = None):
     if fs_ls_list:
       self.file_info = list[FileInfoMock] = []
       self.fs._ls_list = fs_ls_list
